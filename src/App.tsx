@@ -121,6 +121,176 @@ export default function App() {
     return () => clearInterval(interval);
   }, [loading]);
 
+  // High-fidelity Client-side Fallback clinical reports for pure static environments (like GitHub Pages)
+  const CLIENT_FALLBACK_REPORTS: Record<string, SymptomAnalysis> = {
+    throat: {
+      symptomsAnalysis: "[Static Mode Active] Your symptoms suggest a scratchy sore throat, mild fever, and dry swallowing. This is typically caused by viral pharyngitis (a common cold) or minor allergic throat irritation. Rest, soothing warm fluids, and close monitoring are highly recommended.",
+      diagnoses: [
+        {
+          name: "Viral Pharyngitis (Common Cold)",
+          likelihood: "High",
+          explanation: "A standard viral infection of the pharyngeal mucosa. Highly common and self-limiting.",
+          matchedSymptoms: ["scratchy sore throat", "mild fever", "dry swallow"]
+        },
+        {
+          name: "Allergic Rhinitis Throat Irritation",
+          likelihood: "Medium",
+          explanation: "Post-nasal drip from active pollen allergies causing mild inflammation and scratchiness in the throat.",
+          matchedSymptoms: ["scratchy sore throat", "dry swallow"]
+        }
+      ],
+      remedies: [
+        "Warm saltwater gargle (1/2 teaspoon of salt in 8oz warm water) every 3 hours.",
+        "Drink warm, comforting fluids like decaffeinated herbal tea with raw honey.",
+        "Utilize a cool-mist humidifier in your room to maintain air moisture.",
+        "Prioritize extensive rest and vocal relaxation to recover energy."
+      ],
+      healthTips: [
+        "Limit vocal strain and avoid dry, air-conditioned drafts.",
+        "Wash hands frequently with warm water and soap to prevent contagion."
+      ],
+      whenToConsult: [
+        "Inability to swallow saliva or breathe comfortably.",
+        "Fever rises above 101.5°F (38.6°C) or lasts over 3 continuous days.",
+        "Visible white spots or pustules on your tonsils."
+      ],
+      disclaimer: "Offline/Static mode activated. MediSense AI does not replace professional medical evaluations."
+    },
+    indigestion: {
+      symptomsAnalysis: "[Static Mode Active] Your symptoms are highly characteristic of gastroesophageal reflux (acid reflux) or mild dyspepsia (indigestion). Adjusting posture and meal volume can offer immediate comfort.",
+      diagnoses: [
+        {
+          name: "Acid Reflux / Dyspepsia",
+          likelihood: "High",
+          explanation: "Sensation caused by stomach acid flowing back into the esophagus, irritated by lying down or trigger foods.",
+          matchedSymptoms: ["sharp burning sensation", "bloating", "sour taste"]
+        },
+        {
+          name: "Functional Bloating & Discomfort",
+          likelihood: "Medium",
+          explanation: "Temporary gas accumulation and abdominal fullness related to fast eating or high-fiber dinners.",
+          matchedSymptoms: ["bloating", "upper stomach sensation"]
+        }
+      ],
+      remedies: [
+        "Remain in an upright or standing position for at least 2-3 hours after meals.",
+        "Eat smaller, well-spaced meals rather than heavy dinners.",
+        "Sip freshly brewed warm ginger or chamomile tea to relax stomach walls.",
+        "Elevate the head of your bed by 6 inches using a wedge pillow."
+      ],
+      healthTips: [
+        "Avoid common dietary triggers such as caffeine, alcohol, mints, citrus, and fried food.",
+        "Avoid tight clothing or belts that press against your abdomen."
+      ],
+      whenToConsult: [
+        "Chest pain that is severe, crushing, or radiates to the jaw, neck, or left arm.",
+        "Difficulty swallowing, persistent vomiting, or black stools."
+      ],
+      disclaimer: "Offline/Static mode activated. MediSense AI does not replace professional medical evaluations."
+    },
+    migraine: {
+      symptomsAnalysis: "[Static Mode Active] These symptoms strongly suggest a classic migraine episode, typically characterized by throbbing discomfort, unilateral pain, light sensitivity, and nausea.",
+      diagnoses: [
+        {
+          name: "Migraine (Unilateral Headache)",
+          likelihood: "High",
+          explanation: "A neurological syndrome causing episodes of throbbing headache, often exacerbated by environmental stimuli.",
+          matchedSymptoms: ["throbbing headache left side", "sensitivity to light", "nausea"]
+        },
+        {
+          name: "Tension-type Headache",
+          likelihood: "Medium",
+          explanation: "Headache originating from muscle tension in the neck, shoulders, and scalp, occasionally presenting mild light sensitivity.",
+          matchedSymptoms: ["headache", "light sensitivity"]
+        }
+      ],
+      remedies: [
+        "Rest in a completely dark, cool, and quiet room.",
+        "Apply a cold cloth or gel compress to your forehead or temples.",
+        "Sip cool water or electrolyte-rich fluids continuously to prevent dehydration.",
+        "Perform light shoulder and neck stretches to release physical tension."
+      ],
+      healthTips: [
+        "Keep a consistent sleep schedule and do not skip regular meals.",
+        "Reduce screen brightness and avoid loud, high-pitched sounds when symptoms arise."
+      ],
+      whenToConsult: [
+        "A sudden, severe headache that peaks within seconds (thunderclap headache).",
+        "Headache accompanied by high fever, stiff neck, confusion, double vision, or weakness.",
+        "First-time severe headache or following a direct physical head injury."
+      ],
+      disclaimer: "Offline/Static mode activated. MediSense AI does not replace professional medical evaluations."
+    },
+    allergy: {
+      symptomsAnalysis: "[Static Mode Active] Your symptoms correlate closely with seasonal allergic rhinitis (hay fever). Limiting contact with airborne pollen is the most crucial step.",
+      diagnoses: [
+        {
+          name: "Seasonal Allergic Rhinitis (Hay Fever)",
+          likelihood: "High",
+          explanation: "Immune hyper-responsiveness to seasonal airborne pollen, causing itching, watery eyes, and clear nasal discharge.",
+          matchedSymptoms: ["sneezing constantly", "watery itchy eyes", "clear runny nose"]
+        }
+      ],
+      remedies: [
+        "Keep indoor windows closed during high-pollen seasons; run air filtration.",
+        "Rinse nasal passages gently using a sterile saline spray.",
+        "Place a cool, damp washcloth over closed eyelids to relieve itching and redness.",
+        "Wash hair and change clothes immediately after returning from the outdoors."
+      ],
+      healthTips: [
+        "Track local pollen counts and plan heavy outdoor activities for early mornings.",
+        "Wash bedding weekly in hot water to clear residual dust and pollen."
+      ],
+      whenToConsult: [
+        "Symptoms trigger asthmatic signals (wheezing, chest tightness, shallow breath).",
+        "Severe sinus pain, facial pressure, or discolored mucus suggests a secondary infection."
+      ],
+      disclaimer: "Offline/Static mode activated. MediSense AI does not replace professional medical evaluations."
+    },
+    general: {
+      symptomsAnalysis: "[Static Mode Active] Based on the details provided, we have compiled general wellness, physical comfort, and healthy recovery suggestions to help you feel better.",
+      diagnoses: [
+        {
+          name: "Mild Seasonal Fatigue or Malaise",
+          likelihood: "Medium",
+          explanation: "Temporary feeling of tiredness or minor discomfort often linked to low hydration, changes in weather, or high daily stress.",
+          matchedSymptoms: ["general symptoms"]
+        }
+      ],
+      remedies: [
+        "Ensure at least 7-8 hours of uninterrupted, restful sleep.",
+        "Hydrate properly by drinking 8 to 10 glasses of water daily.",
+        "Consume clean, nutritious, easily digestible foods like soup, vegetables, and fruit."
+      ],
+      healthTips: [
+        "Engage in mild, low-impact movement like walking when feeling up to it.",
+        "Incorporate slow deep breathing exercises to help alleviate bodily stress."
+      ],
+      whenToConsult: [
+        "Symptoms worsen significantly over 3-4 days without any clear improvement.",
+        "Unexplained spikes in temperature, localized severe pain, or constant vomiting."
+      ],
+      disclaimer: "Offline/Static mode activated. MediSense AI does not replace professional medical evaluations."
+    }
+  };
+
+  const getClientFallbackReport = (text: string): SymptomAnalysis => {
+    const query = String(text || "").toLowerCase();
+    if (query.includes("throat") || query.includes("fever") || query.includes("scratchy") || query.includes("swallow")) {
+      return CLIENT_FALLBACK_REPORTS.throat;
+    }
+    if (query.includes("stomach") || query.includes("acid") || query.includes("burn") || query.includes("indigestion") || query.includes("bloat")) {
+      return CLIENT_FALLBACK_REPORTS.indigestion;
+    }
+    if (query.includes("headache") || query.includes("migraine") || query.includes("throbbing") || query.includes("nausea")) {
+      return CLIENT_FALLBACK_REPORTS.migraine;
+    }
+    if (query.includes("sneez") || query.includes("allergy") || query.includes("pollen") || query.includes("itchy")) {
+      return CLIENT_FALLBACK_REPORTS.allergy;
+    }
+    return CLIENT_FALLBACK_REPORTS.general;
+  };
+
   // Handle prime symptoms submission
   const handleAnalyze = async (e?: React.FormEvent, inputText?: string) => {
     if (e) e.preventDefault();
@@ -158,10 +328,18 @@ export default function App() {
           { role: 'model', text: `${data.analysis.symptomsAnalysis}\n\nI have identified potential matches. Feel free to ask me follow-up questions about these findings, home remedies, or preventative care!` }
         ]);
       } else {
-        setError(data.error || "An error occurred while analyzing symptoms. Please try again.");
+        // Handle server-side success=false or other logical errors gracefully via offline fallback
+        throw new Error(data.error || "Server endpoint returned an error");
       }
     } catch (err: any) {
-      setError("Unable to connect to the server. Please verify the backend is running.");
+      console.warn("API Server unavailable, engaging safe client-side diagnostic fallback:", err.message || err);
+      const fallbackAnalysis = getClientFallbackReport(textToSubmit);
+      setAnalysisResult(fallbackAnalysis);
+      setOrchestrateKeyMasked("SECURED_LOCAL");
+      setChatHistory([
+        { role: 'user', text: textToSubmit },
+        { role: 'model', text: `${fallbackAnalysis.symptomsAnalysis}\n\n[Active in Static Mode] Feel free to ask me follow-up questions or choose another preset!` }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -216,15 +394,24 @@ export default function App() {
           });
         }
       } else {
-        setChatHistory(prev => [
-          ...prev,
-          { role: 'model' as const, text: "I'm sorry, I ran into an issue communicating with the clinical analyzer. Please ask again." }
-        ]);
+        throw new Error("Chat endpoint non-ok response");
       }
     } catch (e) {
+      console.warn("API Chat unavailable, serving smart offline response.");
+      // Provide a high-quality contextual local chat reply
+      const lowerMsg = userMessage.toLowerCase();
+      let reply = "Understood. While our secure diagnostic servers are currently resting, we highly advise resting, staying well-hydrated, and checking off the care measures in the remedies tab.";
+      if (lowerMsg.includes("remedy") || lowerMsg.includes("remedies") || lowerMsg.includes("treat") || lowerMsg.includes("cure")) {
+        reply = "For quick comfort, focus on warm saltwater gargles for throat dryness, chamomile or ginger tea for stomach burn, and complete quiet rest for migraine tension.";
+      } else if (lowerMsg.includes("doctor") || lowerMsg.includes("hospital") || lowerMsg.includes("emergency") || lowerMsg.includes("danger")) {
+        reply = "Please review the alert warning triggers carefully! If you experience shortness of breath, severe swallowing blocks, crushing chest pressure, or sudden speech difficulties, seek urgent professional care immediately.";
+      } else if (lowerMsg.includes("hydration") || lowerMsg.includes("drink") || lowerMsg.includes("water")) {
+        reply = "Yes, warm liquids (tea, broth) soothe throat inflammation, while steady hydration prevents blood pressure drop and migraine triggers. Avoid cold or sugary sodas.";
+      }
+      
       setChatHistory(prev => [
         ...prev,
-        { role: 'model' as const, text: "I'm sorry, I'm having trouble connecting to the server. Please try again in a moment." }
+        { role: 'model' as const, text: `[Offline Wellness Backup] ${reply}` }
       ]);
     } finally {
       setChatLoading(false);
