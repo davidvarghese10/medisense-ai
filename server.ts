@@ -51,13 +51,16 @@ async function callGeminiWithRetry<T>(
     return await fn();
   } catch (error: any) {
     const errorStr = String(error.message || error);
+    const isQuotaExceeded = errorStr.toLowerCase().includes("quota") || errorStr.toLowerCase().includes("billing");
     const isTransient = 
-      error.status === 503 || 
-      error.status === 429 || 
-      errorStr.includes("503") || 
-      errorStr.includes("429") || 
-      errorStr.includes("high demand") || 
-      errorStr.includes("UNAVAILABLE");
+      !isQuotaExceeded && (
+        error.status === 503 || 
+        error.status === 429 || 
+        errorStr.includes("503") || 
+        errorStr.includes("429") || 
+        errorStr.includes("high demand") || 
+        errorStr.includes("UNAVAILABLE")
+      );
     
     if (isTransient && retries > 0) {
       console.warn(`Gemini API returned transient error (503/429). Retrying in ${delay}ms... (${retries} retries left). Error details: ${errorStr.slice(0, 150)}`);
