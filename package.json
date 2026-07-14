@@ -8,8 +8,9 @@
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "preview": "node dist/server.cjs",
-    "clean": "rm -rf dist server.cjs",
+    "clean": "rm -rf dist docs server.cjs",
     "lint": "tsc --noEmit",
+    "build:docs": "vite build --outDir docs",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
