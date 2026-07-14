@@ -1,0 +1,6 @@
+{
+  "name": "MediSense AI",
+  "description": "An interactive full-stack AI health agent to check symptoms, receive health tips, discover safe home remedies, and learn when to consult a medical professional.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
