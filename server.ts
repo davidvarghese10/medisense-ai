@@ -51,7 +51,13 @@ async function callGeminiWithRetry<T>(
     return await fn();
   } catch (error: any) {
     const errorStr = String(error.message || error);
-    const isQuotaExceeded = errorStr.toLowerCase().includes("quota") || errorStr.toLowerCase().includes("billing");
+    const isQuotaExceeded = 
+      errorStr.toLowerCase().includes("quota") || 
+      errorStr.toLowerCase().includes("billing") || 
+      errorStr.toLowerCase().includes("exhausted") || 
+      errorStr.toLowerCase().includes("rate_limit") || 
+      errorStr.toLowerCase().includes("rate limit") || 
+      errorStr.toLowerCase().includes("limit exceeded");
     const isTransient = 
       !isQuotaExceeded && (
         error.status === 503 || 
@@ -274,8 +280,36 @@ app.get("/api/orchestrate-status", (req, res) => {
   });
 });
 
+// Memory cache and local pool for daily wellness tips to prevent Gemini API quota exhaustion
+let cachedDailyTip: string | null = null;
+let lastTipFetchedTime = 0;
+const TIP_CACHE_DURATION = 12 * 60 * 60 * 1000; // Cache for 12 hours
+
+const LOCAL_DAILY_TIPS = [
+  "Drink plenty of water throughout the day to support cognitive function, joint lubrication, and overall cellular repair.",
+  "Stay active: Aim for at least 30 minutes of moderate cardiovascular activity daily to boost heart health and overall longevity.",
+  "Prioritize sleep consistency: Going to bed and waking up at the same time daily optimizes circadian rhythm and immune system response.",
+  "Incorporate leafy green vegetables and colorful berries into your daily meals to secure vital micronutrients and antioxidants.",
+  "Take a 5-minute movement or posture break for every hour of desk work to relieve spine compression and muscle fatigue.",
+  "Protect your vision during screen work: Follow the 20-20-20 rule—look at something 20 feet away for 20 seconds every 20 minutes.",
+  "Support your gut microbiome by incorporating fermented foods like yogurt, kefir, or kimchi into your weekly diet.",
+  "Manage chronic stress with daily breathing exercises: Even 3 minutes of diaphragmatic breathing can lower cortisol levels.",
+  "Maintain joint flexibility and muscle health by dedicating 10 minutes to full-body stretching every morning or evening.",
+  "Limit simple sugar intake and processed snacks to sustain even energy levels and avoid inflammatory blood sugar spikes."
+];
+
+function getRandomLocalTip(): string {
+  const day = new Date().getDate();
+  return LOCAL_DAILY_TIPS[day % LOCAL_DAILY_TIPS.length];
+}
+
 // Endpoint: Daily Wellness Tip
 app.get("/api/daily-tip", async (req, res) => {
+  const now = Date.now();
+  if (cachedDailyTip && (now - lastTipFetchedTime < TIP_CACHE_DURATION)) {
+    return res.json({ tip: cachedDailyTip });
+  }
+
   try {
     const ai = getGeminiClient();
     const result = await callGeminiWithRetry(() => ai.models.generateContent({
@@ -285,12 +319,22 @@ app.get("/api/daily-tip", async (req, res) => {
         systemInstruction: "You are a proactive, helpful medical AI assistant. Give general wellness advice on diet, hydration, exercise, posture, or sleep.",
       },
     }));
-    res.json({ tip: result.text || "Drink plenty of water throughout the day to support cognitive function, joint lubrication, and overall cellular repair." });
+    
+    const tipText = result.text?.trim() || getRandomLocalTip();
+    cachedDailyTip = tipText;
+    lastTipFetchedTime = now;
+    res.json({ tip: tipText });
   } catch (error: any) {
-    console.warn("Daily tip failed (handled gracefully with static fallback):", error.message || error);
-    res.json({
-      tip: "Stay active: Aim for at least 30 minutes of moderate cardiovascular activity daily to boost heart health and overall longevity.",
-    });
+    const errorStr = String(error.message || error);
+    if (errorStr.includes("quota") || errorStr.includes("429") || errorStr.includes("RESOURCE_EXHAUSTED")) {
+      console.warn("Daily tip: Gemini API quota exceeded (handled gracefully with static wellness rotation).");
+    } else {
+      console.warn("Daily tip failed (handled gracefully with static wellness rotation):", errorStr.slice(0, 150));
+    }
+    
+    // Fall back to a rotating premium local tip
+    const fallbackTip = getRandomLocalTip();
+    res.json({ tip: fallbackTip });
   }
 });
 
